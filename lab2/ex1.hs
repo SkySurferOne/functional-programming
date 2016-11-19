@@ -99,7 +99,8 @@ sum' []   = 0
 sum' (x:xs) = x + sum xs
 
 prod' :: Num a => [a] -> a -- prod' [1,2,3] = 6
-prod' = sum'
+prod' (x:[]) = x
+prod' (x:xs) = x * prod' xs 
 
 length' :: [a] -> Int -- length' [1,1,1,1] = 4
 length' [] = 0
