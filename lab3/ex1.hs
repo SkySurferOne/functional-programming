@@ -1,3 +1,7 @@
+import Data.List
+import Data.Char
+--import Data.Set
+
 f1 = (\x -> x - 1) :: Double -> Double
 f2 = (\x y -> sqrt (x ^ 2 + y ^ 2)) :: Double -> Double -> Double
 f3 = (\x y z -> sqrt (x ^ 2 + y ^ 2 + z ^ 2)) :: Double -> Double -> Double -> Double
@@ -33,7 +37,7 @@ sumWith f [] = 0
 sumWith f (x:[]) = f x
 sumWith f (x:xs) = (f x) + sumWith f xs
 
-sum     = sumWith id
+sum''     = sumWith id
 sumSqr  = sumWith (\y -> y ^ 2)
 sumCube = sumWith (\y -> y ^ 3)
 sumAbs  = sumWith abs
@@ -79,3 +83,160 @@ displEqs = (\t -> 4 * t^2 + 2 * t, \t -> 3 * t^2)
 
 funcListExt :: [ Double -> Double ]
 funcListExt = [ \x -> (sin x)/x, \x -> log x + sqrt x + 1, \x -> (exp 1) ** x, \t -> sqrt (1 + t)]
+
+sortDesc, sortDesc' :: Ord a => [a] -> [a]
+sortDesc' xs = (reverse . sort) xs
+sortDesc = reverse . sort --  the same but in point-free notation
+
+are2FunsEqAt :: Eq a => (t -> a) -> (t -> a) -> [t] -> Bool
+--are2FunsEqAt (+2) (\x -> x + 2) [1..1000] = True
+are2FunsEqAt f g xs = map f xs == map g xs
+
+infixl 9 >.>
+(>.>) :: (a -> b) -> (b -> c) -> (a -> c)
+g >.> f = f . g
+
+-- złożenie listy funkcji
+-- composeFunList :: [a -> a] -> (a -> a)
+-- composeFunList ...
+mindBlow = (.).(.) -- mind (^2) (\a b -> a^2 + b^2) 1 2 = 25
+
+tuple = (((,) $ 1) $ 2)
+
+onlyEven [] = []
+onlyEven (x:xs)
+ | x `mod` 2 == 0 = x : onlyEven xs
+ | otherwise      = onlyEven xs
+
+onlyOdd [] = []
+onlyOdd (x:xs)
+ | x `mod` 2 /= 0 = x : onlyOdd xs
+ | otherwise      = onlyOdd xs
+
+onlyUpper [] = []
+onlyUpper (x:xs)
+ | x < 'a' = x : onlyUpper xs
+ | otherwise = onlyUpper xs
+
+filter' :: (a -> Bool) -> [a] -> [a]
+filter' p = filter p
+
+onlyEven'  = filter' (\x -> x `mod` 2 == 0)
+onlyOdd'   = filter' (\x -> x `mod` 2 /= 0)
+onlyUpper' = filter' (\x -> x < 'a')
+
+doubleElems []     = []
+doubleElems (x:xs) = 2 * x : doubleElems xs
+
+map' :: (a -> b) -> [a] -> [b]
+map' f = map f
+
+doubleElems' = map' (\x -> x * 2)
+sqrElems'    = map' (\x -> x^2)
+--lowerCase   = map'
+
+doubleElems'' xs = [x*2 | x <- xs]
+sqrElems'' xs = [x^2 | x <- xs]
+
+-- evalFuncListAt :: a -> [a -> b] -> [b]
+-- evalFuncListAt x = map ...
+-- wykorzystując map
+
+sumWith' g []     = 0
+sumWith' g (x:xs) = g x + sumWith' g xs -- (+) (g x) (sumWith g xs)
+
+prodWith' g []     = 1
+prodWith' g (x:xs) = g x * prodWith' g xs -- (*) (g x) (prodWith g xs)
+
+sumWith'' :: Num a => (a -> a) -> [a] -> a
+sumWith'' = go 0
+ where
+   go acc g [] = acc
+   go acc g (x:xs) = go (g x + acc) g xs
+
+prodWith'' :: Num a => (a -> a) -> [a] -> a
+prodWith'' = go 1
+ where
+   go acc g [] = acc
+   go acc g (x:xs) = go (g x * acc) g xs
+
+foldr' :: (a -> b -> b) -> b -> [a] -> b
+foldr' f z = foldr f z
+
+sumWith''' g  = foldr' (\x acc -> g x + acc) 0
+prodWith''' g = foldr' (\x acc -> g x * acc) 1
+
+{-
+map wykorzystując foldr
+map wykorzystując foldl
+filter wykorzystując foldr
+filter wykorzystując foldl
+foldl wykorzystując foldr
+foldr wykorzystując foldl
+-}
+
+iSortedAsc :: Ord a => [a] -> Bool
+iSortedAsc xs = and $ zipWith (\a b -> a <= b) xs $ tail xs
+-- isSortedAsc [1,2,2,3] -> True, isSortedAsc [1,2,1] -> False
+
+-- everySecond :: [t] -> [t]
+-- everySecond xs = ... -- everySecond [1..8] -> [1,3,5,7]
+
+-- zip3' :: [a] -> [b] -> [c] -> [(a,b,c)]
+-- zip3' ...
+--
+-- unzip3' :: [(a, b, c)] -> ([a], [b], [c])
+-- unzip3' ...
+--
+-- iSortedDesc :: Ord a => [a] -> Bool
+-- iSortedDesc xs ... -- isSortedDesc [3,2,2,1] -> True, isSortedDesc [1,2,3] -> False
+--
+-- iSorted :: Ord a => [a] -> Bool
+-- iSorted xs ... -- isSorted [1,2,2,3] -> True, isSorted [3,2,1] -> True
+
+-- fibs = 0 : 1 : zipWith (+) fibs (tail fibs) :: [Int]
+
+-- ones = 1 : ones
+-- nats = 1 : map (+1) nats
+
+concat' :: [[a]] -> [a]
+concat' []     = []
+concat' (x:xs) = x ++ concat' xs
+
+-- concat ___ map (___) ___ [1..5] -- [2,4,6,8,10]
+-- concatMap (___) [1..5] -- [2,4,6,8,10]
+-- concatMap (___) ["Ready", "Steady", "Go"] -- "Ready!Steady!Go!"
+
+capitalize :: [Char] -> [Char]
+capitalize [] = []
+capitalize (x:xs) = toUpper x : (map toLower xs)
+
+formatStr s = foldr1 (\w s -> w ++ " " ++ s) .
+          map capitalize .
+          filter (\x -> length x > 1) $
+          words s
+
+prodPrices p = case p of
+ "A" -> 100
+ "B" -> 500
+ "C" -> 1000
+ _   -> error "Unknown product"
+
+products = ["A","B","C"]
+
+-- basic discount strategy
+discStr1 p
+ | price > 999 = 0.3 * price
+ | otherwise   = 0.1 * price
+ where price = prodPrices p
+
+-- flat discount strategy
+discStr2 p = 0.2 * prodPrices p
+
+totalDiscout discStr =
+ foldl1 (+) .
+ map discStr .
+ filter (\p -> prodPrices p > 499)
+
+ -- (opcjonalne) Poprawić (zrefaktoryzować) powyższy kod
+ -- (aspekty: czytelności, ogólności, wydajności)
