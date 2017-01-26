@@ -26,3 +26,27 @@ polarToCartesian'' (MkPolarCoord'' (r,phi)) =
 personInfoToString :: (String,String,String) -> String
 personInfoToString (nm,snm,addr) =
  "name: " ++ nm ++ ", surname: " ++ snm ++ ", addr: " ++ addr
+
+type Name' = String
+type Surname' = String
+type Address' = String
+type PersonInfo' = (Name', Surname', Address')
+type PersonInfoToStringType' = PersonInfo' -> String
+
+personInfoToString' :: PersonInfoToStringType'
+personInfoToString' (name, surname, address) =
+   "name: " ++ name ++ ", surname: " ++ surname ++ ", addr: " ++ address
+
+newtype PersonInfo'' = MkPersonInfo (Name', Surname', Address')
+personInfoToString'' :: PersonInfo'' -> String
+personInfoToString'' (MkPersonInfo (name, surname, address)) =
+   "name: " ++ name ++ ", surname: " ++ surname ++ ", addr: " ++ address
+
+-- product type example (one constructor)
+data CartInt2DVec = MkCartInt2DVec Int Int -- konwencja: prefix 'Mk' dla konstruktora
+
+xCoord :: CartInt2DVec -> Int
+xCoord (MkCartInt2DVec x _) = x
+
+yCoord :: CartInt2DVec -> Int
+yCoord (MkCartInt2DVec _ y) = y
